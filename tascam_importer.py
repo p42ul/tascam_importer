@@ -60,7 +60,7 @@ def main():
         )
         if args.mute_master and MASTER_PATTERN.match(filename):
             print(f'muting {trackname}')
-            track.mute()
+            track.props.append(['MUTESOLO', 1, 0, 0])
         project.add(track)
 
     project_file_path = project_dir.joinpath(f'{source_dir.name}.rpp')
