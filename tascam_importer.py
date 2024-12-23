@@ -5,8 +5,8 @@ import librosa
 from pathlib import Path
 from reathon.nodes import Project, Track, Item, Source
 
-# Mute the master channel
-MUTE_PATTERN = re.compile(r'[0-9_]*TR1[56].wav')
+MASTER_PATTERN = re.compile(r'[0-9_]*TR1[56].wav')
+TRACK_PATTERN = re.compile(r'TR[0-9][0-9]')
 
 
 def main():
@@ -33,15 +33,18 @@ def main():
 
     for source in sources:
         length = librosa.get_duration(path=source.file)
-        track = Track()
+        if length == 0:
+            print(f'skipping empty file {source.file}')
+            continue
+        track = Track(name=TRACK_PATTERN.findall(source.file.name)[0])
         track.add(
             Item(
                 source,
                 position=0,
-                length=length
+                length=length,
             )
         )
-        if args.mute_master and MUTE_PATTERN.match(source.file.name):
+        if args.mute_master and MASTER_PATTERN.match(source.file.name):
             print(f'muting {source.file}')
             track.mute()
         project.add(track)
