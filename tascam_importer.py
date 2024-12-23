@@ -29,27 +29,25 @@ def main():
         print(f'{source_dir} is not a directory, exiting...')
         return
 
-    wav_files = list(sorted([Path(f) for f in source_dir.rglob('*.wav')]))
-
+    wav_files = [Path(f) for f in sorted(source_dir.rglob('*.wav'))]
     project_dir = Path('.', source_dir.name).resolve()
-    print(f'creating project directory {project_dir}')
     project = Project()
+
+    print(f'creating project directory {project_dir}')
     os.mkdir(project_dir.resolve())
+
     for wav in wav_files:
         length = librosa.get_duration(path=wav)
         if length == 0:
             print(f'skipping empty file {wav.name}')
             continue
+
         filename = os.path.splitext(wav.name)[0] + '.flac'
         outpath = os.path.abspath(project_dir.joinpath(filename))
         trackname = TRACK_PATTERN.findall(filename)[0]
-        print(
-            f'filename: {filename} outpath: {outpath} trackname: {trackname}')
-        (ffmpeg
-            .input(wav)
-            .output(outpath)
-            .run()
-         )
+
+        ffmpeg.input(wav).output(outpath).run()
+
         track = Track(name=trackname)
         track.add(
             Item(
